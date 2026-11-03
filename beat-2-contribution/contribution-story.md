@@ -1,4 +1,4 @@
-# Contribution: [Issue Title]
+# Contribution: Add Loading States and Skeleton Components
 
 Path: `beat-2-contribution/contribution-story.md`
 
@@ -7,11 +7,10 @@ the repository is not read. **Keep every section header below under its exact na
 format criteria grade exactly that. Your course repo link is the whole submission: no tool
 files and no evidence uploads are part of Assignment 5.
 
-**Contribution Number:** [1]
-**Student:** [Student name]
-**GitHub Username:** [your GitHub username, exactly as it appears on your profile - no @, no
-profile URL. Your comments upstream are identified by this name.]
-**Issue:** [GitHub issue link]
+**Contribution Number:** 1
+**Student:** Nauman Sayed
+**GitHub Username:** nauman-2004
+**Issue:** https://github.com/NITRR-Official/CampusOS/issues/12
 **Pull Request:** [GitHub PR link, once opened]
 
 One repository, built across units 5 to 8, telling the whole story of your real
@@ -59,11 +58,9 @@ one in the week it belongs to.
 
 I built my issue scout around my Python, TypeScript, and full-stack experience, using good first issue and help wanted searches and ranking unassigned issues with fewer comments higher. The first scan graded all five candidates consistently, so I did not change the rubric, but four of the five results came from the same repository, which showed that my ranking strategy can overrepresent one active project. I then used the scout to grade issues from the course Issue Selection site and chose NITRR-Official/CampusOS #12 because the scout found it unclaimed, active, maintained, and suitable for a newcomer.
 
-**Unit 6: [one line on the tool work]**
+**Unit 6: Added a voice guard for upstream posts and a local CampusOS repo memory**
 
-[2-4 sentences: the voice-guard, the repo-memory file. What broke or
-fell short, and what changed because of it. "Nothing broke" counts when
-it is true - say how you know.]
+I extended my voice guide with rules for claims, maintainer questions, and follow-up pings, then installed the voice guard as a Claude Code hook. The wiring test correctly blocked a body-less gh issue comment command, and my real CampusOS claim passed both repro-check and the guard before it was posted. I also created a local CLAUDE.local.md after a scoped frontend orientation; it records the CampusOS contribution rules and loading-state architecture, including the unresolved question about whether issue #12 should use the design-system package or the duplicate frontend components.
 
 **Unit 7: [one line on the tool work]**
 
@@ -79,24 +76,20 @@ drafted, what you did with the draft.]
 
 ## Why I Chose This Issue
 
-[1-2 paragraphs in your own words: how you searched, what your scan
-surfaced, what your scout's verdict said, why this issue fits your
-profile, and what you hope to learn. If your scout's verdict on it
-was reject and you chose it anyway, say so here and say why; choosing
-against your own tool silently is what loses points. Close with an
-honest read of the tool itself: where the scout fell short on a real
-wild search and what you changed or would change, or what convinced
-you it held up. **Record the link to your claim comment in this section too.**
-Not claimed yet? Write `claim pending` and today's date where the link goes,
-and add the link the moment your claim lands.]
+I found this issue through the AI301 Issue Selection site after searching for issues that matched my experience with React, TypeScript, and full-stack development. I initially considered CampusOS #12 and Apache DataFusion Ballista #2604. After patching my scout's scope check for real-world issues, I graded CampusOS #12 again. The scout accepted it because it was unclaimed, the repository was still active, a maintainer had responded recently elsewhere in the repository, and the issue described one identifiable loading-state improvement.
+
+The scout rated the issue as **ambitious**, mainly because the exact scope is not completely clear. The repository has UI primitives in both the frontend and design-system areas, and the phrase "across the application" could make the task much larger than the specific button, card, and list loading states named in the issue. I still chose it because the React/UI work fits my existing full-stack experience, while giving me experience working in an unfamiliar open-source codebase. I raised those scope questions in my claim instead of assuming the intended design.
+
+One limitation I found in my scout was that my initial search ranking heavily favored one active repository, with four of five scan results coming from the same project. I also found that my original `Scope fits newcomer` check was too strict for real open-source issues, where some implementation details are often intentionally left open. In Unit 6 I replaced it with `scope-feasible`, which rejects true umbrella issues but moves open design edges into a difficulty note instead of automatically rejecting the issue.
+
+**Claim comment:** https://github.com/NITRR-Official/CampusOS/issues/12#issuecomment-6588818845
 
 **Toolkit**
 
-- Tool: issue-scout (your scout: your search strategy, your rubric),
-  and how you used it
-- What it produced: [the scan and its verdict on this issue, described]
-- Difficulties: [where it fell short, or "none met" if none did]
-- What changed: [what you patched or would update, or "nothing"]
+- Tool: issue-scout; I used my profile-based search strategy and rubric to scan open-source issues and then grade CampusOS #12 directly.
+- What it produced: The scout accepted CampusOS #12 on all four required checks and rated it ambitious because the extent of the loading-state work and canonical component location need clarification.
+- Difficulties: My initial scan overrepresented one active repository, and my original Scope fits newcomer check was stricter than real-world issues required.
+- What changed: I replaced Scope fits newcomer with the Unit 6 scope-feasible check and moved open design questions into a separate difficulty note instead of using them as automatic rejection reasons.
 
 ---
 
