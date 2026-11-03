@@ -124,31 +124,26 @@ One limitation I found in my scout was that my initial search ranking heavily fa
 
 **Environment Setup**
 
-[What a stranger would need to stand this up: your operating system,
-the relevant versions (language, runtime, package manager, the project
-itself), and how you set the project up. Then the challenges you faced
-and how you solved them, or that none came up.]
+I reproduced the issue on macOS using my fork of NITRR-Official/CampusOS, based on the repository's dev branch at `42634891f02a6538043d15cfbf97845a25a94aa3` and working on feature/12-loading-states. The project uses pnpm, and pnpm install completed successfully. Since issue #12 describes a missing/inconsistent UX feature rather than a crash, I reproduced it by inspecting the current loading components and their usage in the codebase.
 
 **Steps to Reproduce**
 
-1. [Step 1]
-2. [Step 2]
-3. [Observed result]
+1. Inspect packages/design-system/src/components/ui/button.tsx. The shared Button supports its normal variants and sizes but has no standard loading prop or built-in spinner behavior.
+2. Inspect packages/design-system/src/components/ui/skeleton.tsx and search for <Skeleton> usages. A low-level Skeleton primitive already exists, but pages such as the admin clubs, plugins, users, and events pages manually compose multiple Skeleton elements with page-specific dimensions.
+3. Run find frontend/app -name 'loading.tsx' -print. The only result is frontend/app/(dashboard)/loading.tsx, showing that route-level loading coverage is currently limited to the dashboard route group.
 
 **Reproduction Evidence**
 
-- **Commit showing reproduction:** [link to commit in your fork]
-- **Screenshots/logs:** [if applicable]
-- **My findings:** [what you discovered during reproduction; an
-  honest, evidenced cannot-reproduce that led you to re-pick or ask
-  the maintainer belongs here and costs you nothing]
+- **Commit showing reproduction:** none
+- **Screenshots/logs:** Code inspection showed the shared Button has no loading prop, multiple pages manually compose Skeleton elements, and only frontend/app/(dashboard)/loading.tsx exists as a route-level loading file.
+- **My findings:** I reproduced the feature gap described by #12, but found an important detail: CampusOS already has a basic Skeleton primitive. The missing behavior is therefore consistent and reusable loading patterns rather than skeleton support being completely absent. I also found duplicate UI component locations, so I asked the maintainer which location should be canonical before implementing the change.
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: repro-check; I used it first on my claim draft and then on the claim together with my reproduction report.
+- What it produced: It verified that my environment and inspection commands were followable and that the observed Button, Skeleton, and route-loading behavior directly matched the issue's requested improvements.
+- Difficulties: The issue's broad wording could have led me to say that CampusOS had no skeleton support, but inspection showed that a basic Skeleton primitive already exists.
+- What changed: I described the problem more precisely as inconsistent and non-reusable loading behavior and kept the component-location question open for the maintainer instead of assuming a solution.
 
 ---
 
