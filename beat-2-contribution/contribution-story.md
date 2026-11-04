@@ -97,26 +97,26 @@ One limitation I found in my scout was that my initial search ranking heavily fa
 
 **Problem Description**
 
-[In your own words, what is broken or missing?]
+CampusOS has several different ways of showing loading states instead of one consistent pattern. A basic Skeleton component already exists, but pages manually combine Skeleton elements for cards and lists, and the shared Button does not have a standard loading state.
 
 **Expected Behavior**
 
-[What should happen?]
+Loading feedback should use reusable components and feel consistent with the existing UI. Common content such as cards and lists should be able to use reusable skeleton layouts, buttons should have a standard loading state, and page-level loading UI should be used where appropriate.
 
 **Current Behavior**
 
-[What actually happens?]
+The shared Button has no loading prop or built-in spinner. Several pages manually build their own skeleton layouts with repeated Skeleton elements, and only the dashboard route group currently has a loading.tsx. This means different parts of the application use different loading patterns.
 
 **Affected Components**
 
-[Which parts of the codebase are involved?]
+The main shared components are packages/design-system/src/components/ui/button.tsx, skeleton.tsx, and card.tsx, along with route-level loading UI such as frontend/app/(dashboard)/loading.tsx. There is also an older duplicate component tree under frontend/components/ui, so I asked the maintainer which location should be canonical before making that broader cleanup part of the change.
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: repro-check; I used it to validate my claim and code-level reproduction against issue #12.
+- What it produced: It confirmed that the missing Button loading state, repeated page-specific Skeleton layouts, and limited route-level loading coverage directly support the issue.
+- Difficulties: The issue broadly says there is no clear loading feedback, but inspection showed that CampusOS already has a basic Skeleton primitive and several existing loading patterns.
+- What changed: I narrowed my description from “missing loading support” to inconsistent and non-reusable loading behavior, and I kept the duplicate-component question separate instead of assuming it should be cleaned up in this PR.
 
 ---
 
@@ -151,22 +151,30 @@ I reproduced the issue on macOS using my fork of NITRR-Official/CampusOS, based 
 
 **Analysis**
 
-[Your analysis of the root cause: what is causing the issue, traced
-to the files and functions involved.]
+The issue is caused by loading behavior being implemented independently at individual call sites instead of through shared UI patterns. The design-system Button renders its normal children and props but has no loading state, so forms handle pending states themselves. The existing Skeleton is only a low-level primitive, which causes pages to manually compose repeated skeleton layouts. Page-level loading is also inconsistent, with only the dashboard route group currently providing a Next.js loading.tsx.
+
+Most of the current application uses @campusos/design-system, so that package appears to be the current shared-component location. However, the repository also contains older duplicate components under frontend/components/ui. I asked the maintainer which location should be canonical and have not received a response yet.
 
 **Proposed Solution**
 
-[High-level description of your fix approach, and what you are
-deliberately NOT changing.]
+I will keep the first implementation bounded to reusable loading behavior in the existing design-system package. I plan to add a standard loading state to the shared Button and add a lightweight reusable skeleton composition for the common card loading layout. I will then use the shared loading components in a small representative part of the existing UI so the behavior is demonstrated without refactoring every loading state in the application.
+
+I will not remove or migrate the duplicate frontend/components/ui tree, refactor every existing loading state, or introduce a new frontend testing framework as part of this issue. If the maintainer gives different direction about the canonical component location before the implementation is finished, I will update the plan and record the deviation.
+
+I will not add new route-level loading.tsx files in this first change. The dashboard already has route-level loading, and deciding which additional route groups need it would expand the scope beyond the reusable component work. I will leave additional page-level loading coverage for follow-up or maintainer direction.
 
 **Implementation Plan**
 
-1. [Modify file X to do Y]
-2. [Add or change Z]
-3. [Update tests]
+1. Modify `packages/design-system/src/components/ui/button.tsx` to add an optional loading state. When loading, the Button will be disabled, expose `aria-busy`, and show a spinner while preserving its existing behavior when loading is false.
+2. Add a reusable card skeleton composition alongside the existing design-system Skeleton primitive and export it through the design-system package's existing public API.
+3. Replace the hand-built card-shaped skeleton loading UI in `frontend/app/(dashboard)/admin/plugins/page.tsx` with the reusable skeleton composition as the representative skeleton integration. Keep the table-based admin loading states unchanged because they would require a separate table-row skeleton design.
+4. Use the shared Button loading state on the existing Approve action in the admin clubs UI. The current implementation already disables the button and manually renders a `Loader2` spinner while `actionLoading` is true. After the change, the shared Button should provide that spinner/disabled behavior instead of the call site, and the rendered button should additionally expose `aria-busy` while loading.
+5. Manually verify the admin plugins loading state before and after the change. Before the change, the page manually composes individual Skeleton elements; after the change, it should render the reusable card skeleton composition while preserving the same loading purpose.
+6. Run `pnpm format`, `pnpm lint`, `pnpm type-check`, and `pnpm build`. Re-run `pnpm test` and report its result separately; the pre-implementation baseline already failed because multiple backend plugin suites could not start `MongoMemoryServer` within 10000ms.
 
-[Record deviations here as they happen: what changed mid-build and
-why. A recorded deviation is honest work; silent drift is not.]
+**Non-goals:** I will not migrate the duplicate `frontend/components/ui` tree, refactor every existing loading state, change the table-based admin skeleton layouts, add new route-level `loading.tsx` files, or introduce a new frontend testing framework in this PR.
+
+No implementation deviations yet. The maintainer clarification about the canonical component location and intended extent of "across the application" is still pending.
 
 **Toolkit**
 
@@ -179,17 +187,14 @@ why. A recorded deviation is honest work; silent drift is not.]
 
 ## Testing Strategy
 
-[What observable checks prove the fix: your reproduction steps re-run
-against the built change (before and after), and the repo's own test
-suite or checks with the outcome shown. "Tests pass" with nothing
-observable named is not a strategy.]
+The repository asks for tests for new features, but the frontend `test` script currently only prints `No tests yet` and exits successfully. I will therefore use observable manual verification for the frontend behavior together with the repository's lint, type-check, and build checks rather than introduce a new frontend testing framework in this PR.
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: plan-check; I used it to compare my proposed fix with the reproduced behavior, issue scope, repository code, and maintainer thread.
+- What it produced: The final plan passed all seven checks and bounded the work to a shared Button loading state, a reusable card skeleton, and representative integrations in the admin clubs and admin plugins pages.
+- Difficulties: My first plan did not decide whether page-level loading was in scope, and my second version tried to use a card/list skeleton on a table-based loading state. Plan-check also found that the Approve button already had a hand-written spinner and disabled state.
+- What changed: I explicitly deferred additional route-level loading, moved the skeleton integration to the card-shaped admin plugins page, used the existing admin clubs Approve action for the Button integration, and made aria-busy plus removal of the hand-written spinner part of the observable before/after evidence.
 
 ---
 
