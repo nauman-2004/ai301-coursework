@@ -62,10 +62,9 @@ I built my issue scout around my Python, TypeScript, and full-stack experience, 
 
 I extended my voice guide with rules for claims, maintainer questions, and follow-up pings, then installed the voice guard as a Claude Code hook. The wiring test correctly blocked a body-less gh issue comment command, and my real CampusOS claim passed both repro-check and the guard before it was posted. I also created a local CLAUDE.local.md after a scoped frontend orientation; it records the CampusOS contribution rules and loading-state architecture, including the unresolved question about whether issue #12 should use the design-system package or the duplicate frontend components.
 
-**Unit 7: [one line on the tool work]**
+**Unit 7: Used ship-gate to validate my implementation before opening the PR**
 
-[2-4 sentences: the ship-gate and your gate manifest. What it produced
-on your real branch, what fought you, what changed because of it.]
+I installed ship-gate and created a manifest using CampusOS's lint, type-check, and build checks, while recording the pre-existing pnpm test MongoMemoryServer failure separately. My first ship-gate run stopped because my test evidence only described the UI behavior instead of proving it, so I added rendered-DOM verification for the Button and CardSkeleton. Ship-gate then passed all repository checks and all five pr-precheck checks, and I opened the PR through Claude Code.
 
 **Unit 8: [one line on the tool work]**
 
@@ -209,9 +208,9 @@ built, decisions you made when you made them, wrong turns included.]
 
 I implemented the shared Button loading state, reusable CardSkeleton, and the two representative integrations from my plan. During validation, pnpm build failed while prerendering the home page even though the same build passed on a clean upstream/dev worktree. I traced the regression to the new Button spinner rendering: it gave Radix Slot two children for Button asChild, which broke landing-page links with React.Children.only. I changed the Button so non-loading and asChild cases receive the original single child, while a normal loading Button renders the spinner and content together. After the change, the full build passed and generated all 21 static pages.
 
-**[Date]**
+**2026-11-05**
 
-[Entry]
+My first ship-gate run passed lint, type-check, and build but my own pr-precheck rejected the PR because test_evidence.md described the loading behavior without observable output. Since the authenticated admin routes redirected me to login locally, I did not bypass authentication to create screenshots. Instead, I rendered the real Button and CardSkeleton components with the repository's existing react-dom/server; all 12 verification checks passed, including disabled, aria-busy, spinner rendering, preserved Button content, the asChild regression guard, and the composed CardSkeleton structure. After adding that evidence, ship-gate and all five pr-precheck checks passed.
 
 **Toolkit**
 
@@ -224,27 +223,23 @@ I implemented the shared Button loading state, reusable CardSkeleton, and the tw
 
 ## Pull Request
 
-**PR Link:** [GitHub PR URL when opened]
+**PR Link:** https://github.com/NITRR-Official/CampusOS/pull/137
 
-**PR Description:** [what the PR says; much of the content above
-adapts into it]
+**PR Description:** The PR adds reusable loading behavior to the shared design system for issue #12. It adds a loading state to the shared Button with spinner, disabled, and aria-busy behavior, adds a reusable CardSkeleton, and integrates the shared loading components into the admin clubs and admin plugins pages. The PR also documents the repository checks, the existing pnpm test MongoMemoryServer failure, the rendered-DOM verification, and the parts of the broader loading-state issue that were intentionally left out of this bounded change.
 
 **Maintainer Feedback:**
 
-- [Date]: [feedback received, or "none yet"; silence is a normal
-  state and costs you nothing]
+- 2026-11-05: None yet; PR opened and awaiting review.
 - [Date]: [how you addressed it]
 
-**Status:** [Awaiting review / Iterating / Merged / Closed. The
-status is a fact you record, never a grade: the PR is graded as
-opened.]
+**Status:** Awaiting review
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: ship-gate with my pr-precheck; I used it as the final gate before opening the PR through Claude Code.
+- What it produced: The final run passed CampusOS's lint, type-check, and build checks and all five of my pr-precheck checks: Plan fidelity, Description matches change, Evidence proves behavior, Diff reviewable, and Standards satisfied.
+- Difficulties: The first gate run rejected the PR because my test evidence described the UI behavior without observable output, even though the repository checks passed.
+- What changed: I added rendered-DOM verification for the shared Button and CardSkeleton, including the loading attributes, spinner, preserved label, asChild regression guard, and skeleton structure. The next ship-gate run passed, and I opened PR #137.
 
 ---
 
