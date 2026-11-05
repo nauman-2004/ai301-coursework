@@ -178,23 +178,25 @@ No implementation deviations yet. The maintainer clarification about the canonic
 
 **Toolkit**
 
-- Tool:
+- Tool: plan-check; I used it to compare my proposed fix with the reproduced behavior, issue scope, repository code, and maintainer thread. The final plan passed all seven checks and bounded the work to a shared Button loading state, a reusable card skeleton, and representative integrations in the admin clubs and admin plugins pages.
 - What it produced:
-- Difficulties:
-- What changed:
+- Difficulties: My first plan did not decide whether page-level loading was in scope, and a later version tried to use a card/list skeleton on a table-based loading state. Plan-check also found that the Approve button already had a hand-written spinner and disabled state.
+- What changed: I explicitly deferred additional route-level loading, moved the skeleton integration to the card-shaped admin plugins page, narrowed the reusable skeleton to a card skeleton, and made aria-busy plus removal of the hand-written spinner part of the observable Button change.
 
 ---
 
 ## Testing Strategy
 
-The repository asks for tests for new features, but the frontend `test` script currently only prints `No tests yet` and exits successfully. I will therefore use observable manual verification for the frontend behavior together with the repository's lint, type-check, and build checks rather than introduce a new frontend testing framework in this PR.
+I verified the change against the same loading-state gaps I identified before implementation. For the shared Button, the admin clubs Approve action previously handled its pending state locally with disabled and a manually rendered Loader2 spinner. After the change, it uses the shared loading prop, and the Button provides the disabled state, spinner, and aria-busy behavior. For skeleton loading, the admin plugins page previously composed individual Skeleton elements for every loading card; after the change, it uses the reusable CardSkeleton exported by the design system.
+
+I also ran the repository checks. pnpm format, pnpm lint, pnpm type-check, and pnpm build pass. During validation, the first production build exposed a regression in the new Button implementation because Button asChild received an extra child from the conditional spinner. I corrected that behavior and reran the build successfully, including all 21 generated static pages. pnpm test still fails because several backend plugin suites cannot start MongoMemoryServer within 10000ms; I reproduced the same failure before implementing issue #12. The frontend test script itself reports No tests yet, so I did not introduce a new frontend testing framework for this PR.
 
 **Toolkit**
 
-- Tool: plan-check; I used it to compare my proposed fix with the reproduced behavior, issue scope, repository code, and maintainer thread.
-- What it produced: The final plan passed all seven checks and bounded the work to a shared Button loading state, a reusable card skeleton, and representative integrations in the admin clubs and admin plugins pages.
-- Difficulties: My first plan did not decide whether page-level loading was in scope, and my second version tried to use a card/list skeleton on a table-based loading state. Plan-check also found that the Approve button already had a hand-written spinner and disabled state.
-- What changed: I explicitly deferred additional route-level loading, moved the skeleton integration to the card-shaped admin plugins page, used the existing admin clubs Approve action for the Button integration, and made aria-busy plus removal of the hand-written spinner part of the observable before/after evidence.
+- Tool: ship-gate manifest and manual repository checks; I established the check baseline before implementation and reran the relevant checks afterward.
+- What it produced: Format, lint, type-check, and the final production build pass. The test suite reproduces the same unrelated MongoMemoryServer baseline failure from before my change.
+- Difficulties: The first post-build pnpm build failed while prerendering /, even though the changed integrations were admin pages.
+- What changed: I compared the branch against a clean upstream/dev worktree, proved the base branch built successfully, and traced the regression to the shared Button's interaction with Radix Slot. I fixed the single-child behavior and reran the production build successfully.
 
 ---
 
@@ -203,9 +205,9 @@ The repository asks for tests for new features, but the frontend `test` script c
 [A running log, added to as you work. Date each entry. What you
 built, decisions you made when you made them, wrong turns included.]
 
-**[Date]**
+**2026-11-04**
 
-[Entry]
+I implemented the shared Button loading state, reusable CardSkeleton, and the two representative integrations from my plan. During validation, pnpm build failed while prerendering the home page even though the same build passed on a clean upstream/dev worktree. I traced the regression to the new Button spinner rendering: it gave Radix Slot two children for Button asChild, which broke landing-page links with React.Children.only. I changed the Button so non-loading and asChild cases receive the original single child, while a normal loading Button renders the spinner and content together. After the change, the full build passed and generated all 21 static pages.
 
 **[Date]**
 
@@ -213,10 +215,10 @@ built, decisions you made when you made them, wrong turns included.]
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: Claude Code with my CLAUDE.local.md, accepted plan.md, and the repository validation commands.
+- What it produced: A four-file implementation adding the shared Button loading API, CardSkeleton, and representative integrations in the admin clubs and admin plugins pages.
+- Difficulties: The initial shared Button implementation broke Button asChild during static prerendering because Radix Slot requires a single child.
+- What changed: I changed the loading render path so asChild and non-loading Buttons receive their original single child, while normal loading Buttons render the spinner with their content. The final production build then passed.
 
 ---
 
