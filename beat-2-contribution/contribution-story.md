@@ -11,7 +11,7 @@ files and no evidence uploads are part of Assignment 5.
 **Student:** Nauman Sayed
 **GitHub Username:** nauman-2004
 **Issue:** https://github.com/NITRR-Official/CampusOS/issues/12
-**Pull Request:** [GitHub PR link, once opened]
+**Pull Request:** https://github.com/NITRR-Official/CampusOS/pull/137
 
 One repository, built across units 5 to 8, telling the whole story of your real
 contribution. Fill it as you work, not at the end — the sections below ask for evidence that
@@ -66,10 +66,9 @@ I extended my voice guide with rules for claims, maintainer questions, and follo
 
 I installed ship-gate and created a manifest using CampusOS's lint, type-check, and build checks, while recording the pre-existing pnpm test MongoMemoryServer failure separately. My first ship-gate run stopped because my test evidence only described the UI behavior instead of proving it, so I added rendered-DOM verification for the Button and CardSkeleton. Ship-gate then passed all repository checks and all five pr-precheck checks, and I opened the PR through Claude Code.
 
-**Unit 8: [one line on the tool work]**
+**Unit 8: Added a PR monitor and used it to handle maintainer feedback**
 
-[2-4 sentences: the PR-monitor and your playbook. What it read, what it
-drafted, what you did with the draft.]
+I created a playbook with rules for review responses, staleness, nudges, and when to walk away, then ran the PR monitor on PR #137. It detected the maintainer's request to resolve conflicts and drafted an acknowledgement that did not claim the work was already fixed. I chose not to post that draft immediately; I first rebased onto the latest dev, resolved the conflict, reran the required checks, pushed the updated branch, and then wrote my own reply through the voice guard. The monitor now reports the PR as mergeable with two passing checks and correctly recommends waiting rather than sending another message.
 
 ---
 
@@ -178,7 +177,7 @@ No implementation deviations yet. The maintainer clarification about the canonic
 **Toolkit**
 
 - Tool: plan-check; I used it to compare my proposed fix with the reproduced behavior, issue scope, repository code, and maintainer thread. The final plan passed all seven checks and bounded the work to a shared Button loading state, a reusable card skeleton, and representative integrations in the admin clubs and admin plugins pages.
-- What it produced:
+- What it produced: The final plan passed all seven checks and bounded the work to a shared Button loading state, a reusable card skeleton, and representative integrations in the admin clubs and admin plugins pages.
 - Difficulties: My first plan did not decide whether page-level loading was in scope, and a later version tried to use a card/list skeleton on a table-based loading state. Plan-check also found that the Approve button already had a hand-written spinner and disabled state.
 - What changed: I explicitly deferred additional route-level loading, moved the skeleton integration to the card-shaped admin plugins page, narrowed the reusable skeleton to a card skeleton, and made aria-busy plus removal of the hand-written spinner part of the observable Button change.
 
@@ -201,9 +200,6 @@ I also ran the repository checks. pnpm format, pnpm lint, pnpm type-check, and p
 
 ## Implementation Notes
 
-[A running log, added to as you work. Date each entry. What you
-built, decisions you made when you made them, wrong turns included.]
-
 **2026-11-04**
 
 I implemented the shared Button loading state, reusable CardSkeleton, and the two representative integrations from my plan. During validation, pnpm build failed while prerendering the home page even though the same build passed on a clean upstream/dev worktree. I traced the regression to the new Button spinner rendering: it gave Radix Slot two children for Button asChild, which broke landing-page links with React.Children.only. I changed the Button so non-loading and asChild cases receive the original single child, while a normal loading Button renders the spinner and content together. After the change, the full build passed and generated all 21 static pages.
@@ -211,6 +207,10 @@ I implemented the shared Button loading state, reusable CardSkeleton, and the tw
 **2026-11-05**
 
 My first ship-gate run passed lint, type-check, and build but my own pr-precheck rejected the PR because test_evidence.md described the loading behavior without observable output. Since the authenticated admin routes redirected me to login locally, I did not bypass authentication to create screenshots. Instead, I rendered the real Button and CardSkeleton components with the repository's existing react-dom/server; all 12 verification checks passed, including disabled, aria-busy, spinner rendering, preserved Button content, the asChild regression guard, and the composed CardSkeleton structure. After adding that evidence, ship-gate and all five pr-precheck checks passed.
+
+**2026-11-06**
+
+The maintainer asked me to resolve conflicts against the updated dev branch and rerun formatting. Rebasing produced one conflict in the admin plugins page, where upstream had changed the imports while my PR changed the loading UI to CardSkeleton. I preserved the new upstream imports and my CardSkeleton integration, then fixed a missed import that lint and type-check caught. My force-push also replaced the maintainer's earlier merge commit, so I verified with Git that the latest upstream/dev was still fully included in my rebased branch and explained what happened in my maintainer reply. After the update, the PR monitor reported two passing checks and a mergeable PR.
 
 **Toolkit**
 
@@ -230,7 +230,8 @@ My first ship-gate run passed lint, type-check, and build but my own pr-precheck
 **Maintainer Feedback:**
 
 - 2026-11-05: None yet; PR opened and awaiting review.
-- [Date]: [how you addressed it]
+- 2026-11-06: The maintainer asked me to resolve the conflicts in the PR, run the format check, and commit the updated branch. They also told me that the earlier Vercel issue had been fixed on their side.
+- 2026-11-06: I rebased my branch onto the latest dev, resolved the conflict in the admin plugins page, reran formatting and the repository checks, and pushed the updated branch. During this process I accidentally replaced the maintainer's merge commit with my rebased history, so I checked that the latest upstream/dev was fully included and explained this in my reply. The PR monitor now reports the PR as mergeable with two passing checks and no review decision yet.
 
 **Status:** Awaiting review
 
@@ -247,25 +248,20 @@ My first ship-gate run passed lint, type-check, and build but my own pr-precheck
 
 **Technical Skills Gained**
 
-[What you learned technically, named concretely.]
+I learned more about working with shared React components in a real codebase, especially how a small change to a shared component can affect pages that are not directly related to the feature I am working on. The clearest example was the Button loading state: adding the spinner initially broke Radix Slot for Button asChild on the landing page. I also gained experience with Next.js loading patterns, reusable skeleton components, rendered-DOM verification with react-dom/server, and validating changes with lint, type-check, formatting, and production builds.
 
 **Challenges Overcome**
 
-[What was hard and how you solved it; point at the real events, the
-Toolkit blocks above are full of them.]
+The hardest part was keeping the change small while working in a repository that had changed significantly since I first claimed the issue. I had to decide what parts of the broad loading-state issue belonged in my PR, diagnose a production-build regression, and later rebase onto a much newer dev branch. The rebase created a conflict in the admin plugins page, and I initially kept the wrong import during the resolution. Lint and type-check caught that mistake, and I corrected it before updating the PR. I also accidentally replaced a maintainer merge commit during the force-push, so I verified that the latest upstream dev was still fully included and explained what happened to the maintainer.
 
 **What I'd Do Differently Next Time**
 
-[Reflection on your process.]
+I would check for upstream changes again immediately before starting implementation and again before rebasing, especially in a repository with active architecture work. I would also make my first test-evidence draft more observable instead of describing behavior only in prose. The ship-gate rejection showed me that rendered output or another concrete before/after check is much stronger evidence than simply saying the code now supports a behavior.
 
 ---
 
 ## Resources Used
 
-[What actually helped, not a reading list. List things this story
-already shows you using: the doc you followed to set the environment
-up, the thread that explained the bug, the person who answered you.
-One real entry beats ten plausible ones.]
-
-- [Link to documentation that helped]
-- [Discussion, issue, or post that helped]
+- [CampusOS issue #12](https://github.com/NITRR-Official/CampusOS/issues/12) — defined the loading-state improvements and was the thread I used to ask the maintainer about scope and component placement.
+- [CampusOS CONTRIBUTING.md](https://github.com/NITRR-Official/CampusOS/blob/dev/docs/contributing/CONTRIBUTING.md) — guided the branch, commit, formatting, lint, type-check, build, test, and PR requirements I followed.
+- [CampusOS PR #137](https://github.com/NITRR-Official/CampusOS/pull/137) — maintainer feedback here guided the rebase, conflict resolution, formatting rerun, and updated branch.
